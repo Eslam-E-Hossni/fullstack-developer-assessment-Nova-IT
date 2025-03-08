@@ -1,18 +1,18 @@
-import express from "express";
-import cors from "cors";
-import { connectDB } from "./config/db.js";
-import "./config/dotenv.js"; // Load environment variables
+import mongoose from "mongoose";
+import config from "./config";
+import app from "./app";
 
-const PORT = process.env.PORT || 8080;
+async function server() {
+  try {
+    const conn = await mongoose.connect(config.database_url as string);
 
-const app = express();
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+    app.listen(config.port, () => {
+      console.log(`Server listening on port ${config.port}`);
+    });
+  } catch (error) {
+    console.log("Couldn't connect to MongoDB", error);
+  }
+}
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-
-app.use(express.json()); // allows us to parse incoming requests:req.body
-
-// Start server and connect to DB
-app.listen(PORT, () => {
-  connectDB(); // Connect to MongoDB
-  console.log(`Server is running on port ${PORT}`);
-});
+server().catch((error) => console.log(error));
